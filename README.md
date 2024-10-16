@@ -25,7 +25,7 @@ A **point cloud** is a set of data points in 3D space, typically representing th
 The **Iterative Closest Point (ICP)** algorithm is one of the most widely used methods for point cloud registration. ICP iteratively refines the alignment of two point clouds by minimizing the distance between corresponding points. In this implementation, a point cloud is rotated, and the ICP algorithm is applied to align it with the original point cloud. The results of this alignment are shown below. For instructions on running the ICP algorithm, refer to the [Point Cloud Registration README](Point_Cloud_Registration/README.md).
 
 <p align="center">
-<img width="75%" alt="ICP Alignment Result" src="Point_Cloud_Registration/results/final_fig.png">
+<img width="85%" alt="ICP Alignment Result" src="Point_Cloud_Registration/results/final_fig.png">
 </p>
 
 ---
