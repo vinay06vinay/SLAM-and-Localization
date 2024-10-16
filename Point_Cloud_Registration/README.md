@@ -46,5 +46,5 @@ Follow the instructions below to set up your environment and run the code:
 Below is an example of the output generated using `matplotlib`:
 
 <p align="center">
-<img width="60%" alt="ICP Results" src="results/Figure_1.png">
+<img width="75%" alt="ICP Results" src="results/Figure_1.png">
 </p>
