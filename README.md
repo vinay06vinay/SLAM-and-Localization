@@ -10,7 +10,7 @@ This repository contains algorithms, insights, and implementations of various co
 
 In the `State_Estimation` folder, an **Extended Kalman Filter (EKF)** is implemented to localize a vehicle using LiDAR, IMU, and GNSS data obtained from the Carla Simulator. The **Kalman Filter** is a recursive algorithm that provides optimal state estimation for linear dynamic systems with Gaussian (normally distributed) process and measurement noise. The EKF is a generalization of the Kalman Filter for non-linear systems.
 
-This is my implementation for the final project/assignment from the course [1]. The estimated trajectory of the vehicle after applying the filter is shown below. For instructions on running the code, refer to the [State Estimation README](/SLAM-and-Localization/State_Estimation/README.md).
+This is my implementation for the final project/assignment from the course [1]. The estimated trajectory of the vehicle after applying the filter is shown below. For instructions on running the code, refer to the [State Estimation README](State_Estimation/README.md).
 
 <p align="center">
 <img width="40%" alt="Estimated Vehicle Trajectory" src="State_Estimation/results/Final_Traj.png">
