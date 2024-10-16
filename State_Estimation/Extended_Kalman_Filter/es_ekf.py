@@ -1,7 +1,6 @@
 # Starter code for the Coursera SDC Course 2 final project.
-#
-# Author: Trevor Ablett and Jonathan Kelly
-# University of Toronto Institute for Aerospace Studies
+# Author: Vinay Krishna Bukka
+# Credits: Trevor Ablett and Jonathan Kelly for starter code
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -51,7 +50,7 @@ imu_f = data['imu_f']
 imu_w = data['imu_w']
 gnss = data['gnss']
 lidar = data['lidar']
-
+# print(len(lidar.t))
 ################################################################################################
 # Let's plot the ground truth trajectory to see what it looks like. When you're testing your
 # code later, feel free to comment this out.
@@ -102,18 +101,19 @@ lidar.data = (C_li @ lidar.data.T).T + t_i_li
 # We set the values here.
 ################################################################################################
 
+# The constants for each of the different data
+
 # Part -1
-# var_imu_f = 0.10
-# var_imu_w = 0.25
-# var_gnss  = 0.01
-# var_lidar = 1.00
-
-
-# Part -2
 var_imu_f = 0.10
 var_imu_w = 0.25
-var_gnss  = 0.1
+var_gnss  = 0.01
 var_lidar = 60
+
+# Part -2
+# var_imu_f = 0.10
+# var_imu_w = 0.25
+# var_gnss  = 0.1
+# var_lidar = 60
 
 # Part -3
 # var_imu_f = 0.10
@@ -160,20 +160,16 @@ def measurement_update(sensor_var, p_cov_check, y_k, p_check, v_check, q_check):
     S = h_jac @ p_cov_check @ h_jac.T + R  # Innovation covariance
     
     # 3.1 Compute Kalman Gain
-    # K = p_cov_check @ h_jac.T @ np.linalg.inv(S) 
     K = np.matmul(np.matmul(p_cov_check, h_jac.T), np.linalg.inv(S))
 
     # 3.2 Compute error state
-    
     error = K @ (y_k - p_check)
 
     # 3.3 Correct predicted state
-
     p_hat = p_check + error[0:3]  # Correct position
     v_hat = v_check + error[3:6]  # Correct velocity
     delta_phi = error[6:9]  # Correct orientation (Euler angle error)
     
-
     # Correct quaternion with small-angle approximation (error quaternion)
     q_error = Quaternion(axis_angle=delta_phi)  # Convert error to quaternion
     q_hat = Quaternion(*q_check).quat_mult_right(q_error)  # Correct quaternion
@@ -194,20 +190,17 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
     delta_t = imu_f.t[k] - imu_f.t[k - 1]
     # IMU accelerometer (specific force) data, which is in the vehicle frame
     f_k_minus_1 = imu_f.data[k - 1]
-    
     # IMU gyroscope (rotational velocity) data, also in the vehicle frame
     w_k_minus_1 = imu_w.data[k - 1]
-
     # 1. Update state with IMU inputs
     #position, velocity and orientation updates
     p_prev = p_est[k - 1]  # Previous position
     v_prev = v_est[k - 1]  # Previous velocity
     q_prev = Quaternion(*q_est[k - 1])  # Previous orientation (quaternion)
     # Convert specific force to the world frame
-    C_ns_rotation = q_prev.to_mat()  # COnverting orientation variation estimate to quaternion matrix
+    C_ns_rotation = q_prev.to_mat()  # Converting orientation variation estimate to quaternion matrix
 
     # Do predictions for above based on previous states
-
     # print("1",np.dot(C_ns_rotation,f_k_minus_1 ))
     # print("2",C_ns_rotation*f_k_minus_1 )
     # print("3",C_ns_rotation @ f_k_minus_1 )
@@ -227,14 +220,12 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
     process_noise_cov[0:3, 0:3] *= var_imu_f  # Linear acceleration noise variance
     process_noise_cov[3:6, 3:6] *= var_imu_w  # Angular velocity noise variance
 
-    
     # 2. Propagate uncertainty
     p_cov[k] = np.matmul(np.dot(F ,p_cov[k - 1]), F.T) + np.matmul(np.dot(l_jac,process_noise_cov), l_jac.T) * delta_t ** 2
     # print(p_cov[k])
 
-
     # 3. Check availability of GNSS and LIDAR measurements and Update states
-    if lidar_i < len(lidar.t) and lidar.t[lidar_i] <= imu_f.t[k-1]:
+    if lidar_i < lidar.data.shape[0] and lidar.t[lidar_i] <= imu_f.t[k]:
         # Perform LIDAR update
         p_check = p_est[k]
         v_check = v_est[k]
@@ -243,7 +234,7 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
         p_est[k], v_est[k], q_est[k], p_cov[k] = measurement_update(var_lidar, p_cov[k], y_k, p_check, v_check, q_check)
         lidar_i += 1
 
-    if gnss_i < len(gnss.t) and gnss.t[gnss_i] <= imu_f.t[k-1]:
+    if gnss_i < gnss.data.shape[0] and gnss.t[gnss_i] <= imu_f.t[k]:
         # Perform GNSS update
         p_check = p_est[k]
         v_check = v_est[k]
@@ -251,10 +242,6 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
         y_k = gnss.data[gnss_i]  # ground truth gnss measurement
         p_est[k], v_est[k], q_est[k], p_cov[k] = measurement_update(var_gnss, p_cov[k], y_k, p_check, v_check, q_check)
         gnss_i += 1
-
-
-
-    
 
 #### 6. Results and Analysis ###################################################################
 
@@ -334,22 +321,22 @@ plt.show()
 ################################################################################################
 
 # Pt. 1 submission
-# p1_indices = [9000, 9400, 9800, 10200, 10600]
-# p1_str = ''
-# for val in p1_indices:
-#     for i in range(3):
-#         p1_str += '%.3f ' % (p_est[val, i])
-# with open('pt1_submission.txt', 'w') as file:
-#     file.write(p1_str)
+p1_indices = [9000, 9400, 9800, 10200, 10600]
+p1_str = ''
+for val in p1_indices:
+    for i in range(3):
+        p1_str += '%.3f ' % (p_est[val, i])
+with open('pt1_submission.txt', 'w') as file:
+    file.write(p1_str)
 
 # Pt. 2 submission
-p2_indices = [9000, 9400, 9800, 10200, 10600]
-p2_str = ''
-for val in p2_indices:
-    for i in range(3):
-        p2_str += '%.3f ' % (p_est[val, i])
-with open('pt2_submission.txt', 'w') as file:
-    file.write(p2_str)
+# p2_indices = [9000, 9400, 9800, 10200, 10600]
+# p2_str = ''
+# for val in p2_indices:
+#     for i in range(3):
+#         p2_str += '%.3f ' % (p_est[val, i])
+# with open('pt2_submission.txt', 'w') as file:
+#     file.write(p2_str)
 
 # Pt. 3 submission
 # p3_indices = [6800, 7600, 8400, 9200, 10000]
